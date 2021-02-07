@@ -24,9 +24,9 @@ export class UserService {
     return this.http.get<IUser>(`${this.resourceUrl}/${login}`, { observe: 'response' });
   }
 
-  query(req?: any): Observable<HttpResponse<IUser[]>> {
+  query(domain, req?: any): Observable<HttpResponse<IUser[]>> {
     const options = createRequestOption(req);
-    return this.http.get<IUser[]>(this.resourceUrl, { params: options, observe: 'response' });
+    return this.http.get<IUser[]>(this.resourceUrl + '/domain/' + domain, { params: options, observe: 'response' });
   }
 
   delete(login: string): Observable<HttpResponse<any>> {

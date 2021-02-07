@@ -79,7 +79,7 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
 
   loadAll() {
     this.userService
-      .query({
+      .query(this.currentAccount.domain, {
         page: this.page - 1,
         size: this.itemsPerPage,
         sort: this.sort()

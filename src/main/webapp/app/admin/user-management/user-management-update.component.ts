@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { JhiLanguageHelper, User, UserService } from 'app/core';
+import { AccountService, JhiLanguageHelper, User, UserService } from 'app/core';
 
 @Component({
   selector: 'jhi-user-mgmt-update',
@@ -13,6 +13,7 @@ export class UserMgmtUpdateComponent implements OnInit {
   languages: any[];
   authorities: any[];
   isSaving: boolean;
+  currentAccount;
 
   editForm = this.fb.group({
     id: [null],
@@ -30,7 +31,8 @@ export class UserMgmtUpdateComponent implements OnInit {
     private userService: UserService,
     private route: ActivatedRoute,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private accountService: AccountService
   ) {}
 
   ngOnInit() {
@@ -46,12 +48,15 @@ export class UserMgmtUpdateComponent implements OnInit {
     this.languageHelper.getAll().then(languages => {
       this.languages = languages;
     });
+    this.accountService.identity().then(account => {
+      this.currentAccount = account;
+    });
   }
 
   private updateForm(user: User): void {
     this.editForm.patchValue({
       id: user.id,
-      login: user.login,
+      login: user.login.substring(user.login.indexOf('.') + 1, user.login.length),
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
@@ -76,13 +81,15 @@ export class UserMgmtUpdateComponent implements OnInit {
   }
 
   private updateUser(user: User): void {
-    user.login = this.editForm.get(['login']).value;
+    user.login = this.currentAccount.domain + '.' + this.editForm.get(['login']).value;
     user.firstName = this.editForm.get(['firstName']).value;
     user.lastName = this.editForm.get(['lastName']).value;
     user.email = this.editForm.get(['email']).value;
     user.activated = this.editForm.get(['activated']).value;
     user.langKey = this.editForm.get(['langKey']).value;
     user.authorities = this.editForm.get(['authorities']).value;
+    user.domain = this.currentAccount.domain;
+    user.status = this.currentAccount.status;
   }
 
   private onSaveSuccess(result) {
